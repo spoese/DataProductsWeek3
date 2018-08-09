@@ -1,0 +1,55 @@
+---
+title: "Wine Quality vs. Price"
+author: "Scott Poese"
+date: "August 7, 2018"
+output: ioslides_presentation
+---
+
+```{r libraries, message=FALSE, echo=FALSE}
+library(plotly)
+library(ggplot2)
+library(dplyr)
+```
+
+## Dataset Information
+
+The plot here shows wine reviews from the dataset available from
+https://www.kaggle.com/zynicide/wine-reviews/ and compares them to the price of
+the wine.
+
+```{r read, cache = TRUE}
+wine <- read.csv("~/R/DevelopingDataProducts/wine-reviews/winemag-data-130k-v2.csv")
+```
+
+## Data Wrangling
+
+The dataset is filtered to only show wines which had a price listed, and whose
+price was not an outlier in the 1.5*IQR sense. Then 500 of these wines were
+randomly selected to show a graph that was not too busy.
+
+```{r filter}
+wine <- wine[!is.na(wine$price),]
+wine <- filter(wine,price < 1.5 * IQR(wine$price) + 
+                       quantile(wine$price,.75))
+set.seed(16)
+wine <- wine[sample(nrow(wine),500),]
+```
+
+## Plot
+
+The plot is then created using `ggplotly` (part of the `plotly' package).
+
+```{r plot, message = FALSE}
+p <- ggplot(data = wine, aes(x=price,y=points)) + 
+        geom_point() + 
+        geom_smooth() +
+        labs(x = "Price(USD)", y = "Points", 
+             title = "Wine Quality vs. Price")
+gg <- ggplotly(p)
+```
+
+## Plot
+
+```{r picture}
+gg
+```
